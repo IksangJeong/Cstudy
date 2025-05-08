@@ -3,255 +3,538 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>C코드 웹 시각화</title>
+    <title>C언어 스터디 중간 발표</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+    /* 파스텔 색상 팔레트 */
+    --primary-color: #9fb7d3; /* 왼쪽 파스텔 블루 #9FB7D3 */
+    --primary-hover: #8aa6c2;
+    --secondary-color: #e8ceba; /* 중앙 베이지색 #E8CEBA */
+    --tertiary-color: #eadacc; /* 오른쪽 연한 베이지색 #EADACC */
+    --light-color: #f7f5f3; /* 배경색 매우 연한 베이지 */
+    
+    --dark-color: #555555;
+    --gray-color: #9a9a9a;
+    
+    --danger-color: #d1a7a0;
+    --warning-color: #e0cdaf;
+    --success-color: #b1c8c0;
+    --info-color: #a3b5cb;
+    
+    /* 배경색 */
+    --bg-color: #f7f5f3;
+    --card-bg: #ffffff;
+}
+        
+        * {
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 0;
+            box-sizing: border-box;
         }
+        
+        body {
+            font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+            color: var(--dark-color);
+            background-color: var(--bg-color);
+            line-height: 1.6;
+        }
+        
         .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 30px;
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
         }
-        h1 {
-            color: #333;
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2.5rem 0;
             text-align: center;
-            margin-bottom: 20px;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            overflow: hidden;
         }
-        h2 {
-            color: #4285f4;
-            border-bottom: 2px solid #4285f4;
-            padding-bottom: 5px;
-            margin-top: 30px;
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 60%);
+            transform: rotate(30deg);
         }
-        .app-container {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-            background-color: #fcfcfc;
+        
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            position: relative;
         }
-        .console-output {
-            font-family: 'Consolas', monospace;
-            white-space: pre-wrap;
-            padding: 10px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            border-left: 4px solid #4285f4;
+        
+        .subtitle {
+            font-size: 1.1rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-bottom: 1rem;
         }
-        .input-container {
+        
+        .tabs {
             display: flex;
-            gap: 10px;
-            margin: 15px 0;
+            background-color: var(--card-bg);
+            padding: 0 1rem;
+            position: relative;
+            margin-top: -1px;
+            border-bottom: 1px solid #f0e6da;
         }
-        .input-field {
-            flex-grow: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        .submit-btn {
-            padding: 8px 20px;
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 4px;
+        
+        .tab {
+            padding: 1rem 1.5rem;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        .submit-btn:hover {
-            background-color: #3367d6;
-        }
-        .hidden {
-            display: none;
-        }
-        .result-container {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 4px;
-            background-color: #e6f4ea;
-            border-left: 4px solid #34a853;
-        }
-        .error-message {
-            color: #d93025;
-            margin-top: 5px;
-        }
-        .game-container {
-            text-align: center;
-        }
-        .game-message {
-            font-size: 18px;
-            margin: 10px 0;
-        }
-        .success-message {
-            color: #34a853;
-            font-weight: bold;
-        }
-        .failure-message {
-            color: #d93025;
-        }
-        .warning-message {
-            color: #f29900;
-        }
-        .reset-btn {
-            padding: 8px 20px;
-            background-color: #fbbc05;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-        .reset-btn:hover {
-            background-color: #f29900;
-        }
-        .bmi-result {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .bmi-category {
-            font-size: 18px;
-            text-align: center;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        .bmi-underweight {
-            background-color: #e0f2fe;
-            color: #0369a1;
-        }
-        .bmi-normal {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        .bmi-overweight {
-            background-color: #fef9c3;
-            color: #854d0e;
-        }
-        .bmi-obese {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-        .time-result {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .time-unit {
-            text-align: center;
-        }
-        .time-value {
-            font-size: 36px;
-            background-color: #4285f4;
-            color: white;
-            border-radius: 8px;
-            width: 80px;
-            height: 80px;
+            font-weight: 600;
+            color: var(--gray-color);
+            transition: all 0.3s ease;
+            position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
         }
-        .time-label {
-            margin-top: 5px;
-            color: #555;
+        
+        .tab:hover {
+            color: var(--primary-color);
         }
-        .tab-container {
-            display: flex;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 20px;
-        }
-        .tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            margin-right: 5px;
-        }
+        
         .tab.active {
-            background-color: white;
-            border-bottom: 2px solid white;
-            font-weight: bold;
-            color: #4285f4;
+            color: var(--primary-color);
         }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
         .tab-content {
             display: none;
         }
+        
         .tab-content.active {
             display: block;
+            animation: fadeIn 0.5s ease;
         }
         
-        /* 소스 코드 섹션 추가 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .app-container {
+            background-color: var(--light-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #f0e6da;
+        }
+        
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .app-title i {
+            color: var(--primary-color);
+        }
+        
+        .developer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #f7f5f3;
+            color: #8aa6c2;
+            font-size: 0.825rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+        }
+        
+        .console-output {
+            font-family: 'Fira Code', 'SF Mono', 'Consolas', monospace;
+            background-color: #3a3d44;
+            color: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            font-size: 0.925rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin: 1rem 0;
+        }
+        
+        .input-field {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #f0e6da;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            outline: none;
+            background-color: white;
+        }
+        
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(248, 165, 194, 0.2);
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background-color: #f0e6da;
+            color: var(--dark-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e8d9ca;
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-success:hover {
+            background-color: #7fd99e;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+        }
+        
+        .btn-warning:hover {
+            background-color: #ffc988;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .message-success {
+            background-color: #e6f8ee;
+            color: #1e7c4f;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .message-error {
+            background-color: #fdf2f2;
+            color: #b84c4c;
+            border-left: 4px solid var(--danger-color);
+        }
+        
+        .message-warning {
+            background-color: #fff8eb;
+            color: #b28528;
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        /* 시간 변환기 스타일 */
+        .time-result {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            perspective: 1000px;
+        }
+        
+        .time-block {
+            text-align: center;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+        
+        .time-value {
+            background: var(--primary-color);
+            color: white;
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .time-value::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .time-label {
+            font-weight: 500;
+            color: var(--gray-color);
+            margin-top: 0.5rem;
+        }
+        
+        /* BMI 계산기 스타일 */
+        .bmi-result {
+            background-color: var(--light-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s;
+            border: 1px solid #f0e6da;
+        }
+        
+        .bmi-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        
+        .bmi-category {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        
+        .bmi-underweight {
+            background-color: #e1f0fb;
+            color: #3b7aac;
+        }
+        
+        .bmi-normal {
+            background-color: #e5f8ee;
+            color: #2a9d74;
+        }
+        
+        .bmi-overweight {
+            background-color: #fff3d9;
+            color: #b38629;
+        }
+        
+        .bmi-obese {
+            background-color: #fbe7e7;
+            color: #b35353;
+        }
+        
+        /* 소스 코드 섹션 */
         .source-code {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            border: 1px solid #dee2e6;
+            margin-top: 2rem;
+            background-color: var(--light-color);
+            border-radius: 12px;
+            border: 1px solid #f0e6da;
+            overflow: hidden;
         }
-        .source-code h3 {
-            margin-top: 0;
-            color: #555;
+        
+        .source-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+            background-color: #f9f5f0;
+            border-bottom: 1px solid #f0e6da;
         }
-        .source-code pre {
-            background-color: #282c34;
-            color: #abb2bf;
-            padding: 15px;
-            border-radius: 4px;
+        
+        .source-title {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--dark-color);
+        }
+        
+        .source-title i {
+            color: var(--primary-color);
+        }
+        
+        .code-container {
+            position: relative;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .code-container pre {
+            background-color: #2e3440;
+            color: #e5e9f0;
+            padding: 1.5rem;
+            border-radius: 0 0 12px 12px;
             overflow-x: auto;
-            font-family: 'Consolas', monospace;
             line-height: 1.5;
+            font-family: 'Fira Code', 'SF Mono', 'Consolas', monospace;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        /* 모바일 반응형 */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1 1 auto;
+                text-align: center;
+                justify-content: center;
+                padding: 0.75rem 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            .app-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            
+            .developer-badge {
+                align-self: flex-start;
+            }
+            
+            .time-result {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .time-block {
+                margin-bottom: 1rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>C코드 웹 시각화</h1>
-        
-        <div class="tab-container">
-            <div class="tab active" data-tab="number-game">숫자 맞추기 게임</div>
-            <div class="tab" data-tab="time-converter">시:분:초 변환기</div>
-            <div class="tab" data-tab="bmi-calculator">BMI 계산기</div>
-        </div>
-        
-        <!-- 숫자 맞추기 게임 -->
-        <div id="number-game" class="tab-content active">
-            <div class="app-container game-container">
-                <h2>숫자 맞추기 게임</h2>
-                <div class="console-output">숫자 맞추기 게임 시작!
-0부터 9 사이의 숫자 중 하나를 맞춰보세요.</div>
-                
-                <div class="game-message">숫자 입력:</div>
-                <div class="input-container">
-                    <input type="number" id="number-guess" class="input-field" min="0" max="9">
-                    <button id="guess-btn" class="submit-btn">확인</button>
+        <div class="card">
+            <header>
+                <h1>C언어 스터디 중간 발표</h1>
+                <p class="subtitle">코드 시각화</p>
+            </header>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="number-game">
+                    <i class="fas fa-dice"></i> 숫자 맞추기 게임
                 </div>
-                
-                <div id="guess-result" class="console-output hidden"></div>
-                <div id="success-message" class="game-message success-message hidden"></div>
-                
-                <button id="reset-number-game" class="reset-btn">게임 다시 시작</button>
+                <div class="tab" data-tab="time-converter">
+                    <i class="fas fa-clock"></i> 시:분:초 변환기
+                </div>
+                <div class="tab" data-tab="bmi-calculator">
+                    <i class="fas fa-weight"></i> BMI 계산기
+                </div>
             </div>
             
-            <!-- 소스 코드 섹션 -->
-            <div class="source-code">
-                <h3>C 소스 코드</h3>
-                <pre>
+            <div class="content">
+                <!-- 숫자 맞추기 게임 -->
+                <div id="number-game" class="tab-content active">
+                    <div class="app-container">
+                        <div class="app-header">
+                            <h2 class="app-title"><i class="fas fa-dice"></i> 숫자 맞추기 게임</h2>
+                            <div class="developer-badge">
+                                <i class="fas fa-code"></i> 개발자: 정문주
+                            </div>
+                        </div>
+                        
+                        <div class="console-output">숫자 맞추기 게임 시작!
+0부터 9 사이의 숫자 중 하나를 맞춰보세요.</div>
+                        
+                        <div class="input-group">
+                            <input type="number" id="number-guess" class="input-field" min="0" max="9" placeholder="0에서 9 사이의 숫자">
+                            <button id="guess-btn" class="btn">
+                                <i class="fas fa-check"></i> 확인
+                            </button>
+                        </div>
+                        
+                        <div id="guess-result" class="message message-error hidden"></div>
+                        <div id="success-message" class="message message-success hidden"></div>
+                        
+                        <button id="reset-number-game" class="btn btn-warning">
+                            <i class="fas fa-redo"></i> 게임 다시 시작
+                        </button>
+                    </div>
+                    
+                    <!-- 소스 코드 섹션 -->
+                    <div class="source-code">
+                        <div class="source-header">
+                            <div class="source-title">
+                                <i class="fas fa-code"></i> C 소스 코드
+                            </div>
+                        </div>
+                        <div class="code-container">
+                            <pre>
 #include &lt;stdio.h&gt;
 #include &lt;stdlib.h&gt;
 #include &lt;time.h&gt;
@@ -284,46 +567,59 @@ int main() {
         }
     }
     return 0;
-}
-                </pre>
-            </div>
-        </div>
-        
-        <!-- 시:분:초 변환기 -->
-        <div id="time-converter" class="tab-content">
-            <div class="app-container">
-                <h2>시:분:초 변환기</h2>
-                <div class="console-output">초를 입력하세요:</div>
-                
-                <div class="input-container">
-                    <input type="number" id="seconds-input" class="input-field" min="0">
-                    <button id="convert-time-btn" class="submit-btn">변환</button>
+}</pre>
+                        </div>
+                    </div>
                 </div>
                 
-                <div id="time-result-container" class="hidden">
-                    <div class="time-result">
-                        <div class="time-unit">
-                            <div id="hours-value" class="time-value">0</div>
-                            <div class="time-label">시간</div>
+                <!-- 시:분:초 변환기 -->
+                <div id="time-converter" class="tab-content">
+                    <div class="app-container">
+                        <div class="app-header">
+                            <h2 class="app-title"><i class="fas fa-clock"></i> 시:분:초 변환기</h2>
+                            <div class="developer-badge">
+                                <i class="fas fa-code"></i> 개발자: 박서현
+                            </div>
                         </div>
-                        <div class="time-unit">
-                            <div id="minutes-value" class="time-value">0</div>
-                            <div class="time-label">분</div>
+                        
+                        <div class="console-output">초를 입력하세요:</div>
+                        
+                        <div class="input-group">
+                            <input type="number" id="seconds-input" class="input-field" min="0" placeholder="초 단위 시간">
+                            <button id="convert-time-btn" class="btn">
+                                <i class="fas fa-sync-alt"></i> 변환
+                            </button>
                         </div>
-                        <div class="time-unit">
-                            <div id="seconds-value" class="time-value">0</div>
-                            <div class="time-label">초</div>
+                        
+                        <div id="time-result-container" class="hidden">
+                            <div class="time-result">
+                                <div class="time-block">
+                                    <div id="hours-value" class="time-value">0</div>
+                                    <div class="time-label">시간</div>
+                                </div>
+                                <div class="time-block">
+                                    <div id="minutes-value" class="time-value">0</div>
+                                    <div class="time-label">분</div>
+                                </div>
+                                <div class="time-block">
+                                    <div id="seconds-value" class="time-value">0</div>
+                                    <div class="time-label">초</div>
+                                </div>
+                            </div>
+                            
+                            <div id="time-result-text" class="console-output"></div>
                         </div>
                     </div>
                     
-                    <div id="time-result-text" class="console-output"></div>
-                </div>
-            </div>
-            
-            <!-- 소스 코드 섹션 -->
-            <div class="source-code">
-                <h3>C 소스 코드</h3>
-                <pre>
+                    <!-- 소스 코드 섹션 -->
+                    <div class="source-code">
+                        <div class="source-header">
+                            <div class="source-title">
+                                <i class="fas fa-code"></i> C 소스 코드
+                            </div>
+                        </div>
+                        <div class="code-container">
+                            <pre>
 #include &lt;stdio.h&gt;
 int main()
 {
@@ -336,38 +632,50 @@ int main()
     seconds = total_seconds % 60;             // 남은 초 중에서 초 계산: 60으로 나눈 나머지
     printf("%d초는 %d시간 %d분 %d초입니다.\n", total_seconds, hours, minutes, seconds);   // 결과 출력
     return 0;
-}
-                </pre>
-            </div>
-        </div>
-        
-        <!-- BMI 계산기 -->
-        <div id="bmi-calculator" class="tab-content">
-            <div class="app-container">
-                <h2>BMI 계산기</h2>
-                
-                <div class="input-container">
-                    <input type="number" id="height-input" class="input-field" min="0" step="0.1" placeholder="키(cm)를 입력하세요">
+}</pre>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="input-container">
-                    <input type="number" id="weight-input" class="input-field" min="0" step="0.1" placeholder="몸무게(kg)를 입력하세요">
-                </div>
-                
-                <div class="input-container">
-                    <button id="calculate-bmi-btn" class="submit-btn">BMI 계산</button>
-                </div>
-                
-                <div id="bmi-result-container" class="hidden">
-                    <div id="bmi-value" class="bmi-result"></div>
-                    <div id="bmi-category" class="bmi-category"></div>
-                </div>
-            </div>
-            
-            <!-- 소스 코드 섹션 -->
-            <div class="source-code">
-                <h3>C 소스 코드</h3>
-                <pre>
+                <!-- BMI 계산기 -->
+                <div id="bmi-calculator" class="tab-content">
+                    <div class="app-container">
+                        <div class="app-header">
+                            <h2 class="app-title"><i class="fas fa-weight"></i> BMI 계산기</h2>
+                            <div class="developer-badge">
+                                <i class="fas fa-code"></i> 개발자: 박지원
+                            </div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <input type="number" id="height-input" class="input-field" min="0" step="0.1" placeholder="키(cm)를 입력하세요">
+                        </div>
+                        
+                        <div class="input-group">
+                            <input type="number" id="weight-input" class="input-field" min="0" step="0.1" placeholder="몸무게(kg)를 입력하세요">
+                        </div>
+                        
+                        <div class="input-group">
+                            <button id="calculate-bmi-btn" class="btn btn-success">
+                                <i class="fas fa-calculator"></i> BMI 계산
+                            </button>
+                        </div>
+                        
+                        <div id="bmi-result-container" class="bmi-result hidden">
+                            <div id="bmi-value" class="bmi-value"></div>
+                            <div id="bmi-category" class="bmi-category"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 소스 코드 섹션 -->
+                    <div class="source-code">
+                        <div class="source-header">
+                            <div class="source-title">
+                                <i class="fas fa-code"></i> C 소스 코드
+                            </div>
+                        </div>
+                        <div class="code-container">
+                            <pre>
 #include &lt;stdio.h&gt; 
 int main() {
     float height, weight, bmi;  // 실수형 변수 선언
@@ -389,8 +697,10 @@ int main() {
         (bmi < 25.0) ? "과체중입니다." :
         "비만입니다.");
     return 0;  // 프로그램 정상 종료
-}
-                </pre>
+}</pre>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -430,24 +740,9 @@ int main() {
             const successMessage = document.getElementById('success-message');
             const resetBtn = document.getElementById('reset-number-game');
             
-            // 서버에서 랜덤 숫자를 받아오는 함수 (선택적)
-            async function getRandomNumber() {
-                try {
-                    const response = await fetch('/api/random');
-                    const data = await response.json();
-                    return data.number;
-                } catch (error) {
-                    console.error('Error getting random number:', error);
-                    // 서버 에러 시 클라이언트에서 랜덤 생성
-                    return Math.floor(Math.random() * 10);
-                }
-            }
-            
             // 게임 초기화
-            async function initGame() {
-                // 서버 API 또는 클라이언트에서 랜덤 숫자 생성
-                // answer = await getRandomNumber(); // 서버 API 사용 시
-                answer = Math.floor(Math.random() * 10); // 클라이언트에서 생성
+            function initGame() {
+                answer = Math.floor(Math.random() * 10); // 0~9 중 랜덤 숫자
                 attempts = 0;
                 isCorrect = false;
                 
@@ -470,7 +765,7 @@ int main() {
                 
                 // 입력값 검증
                 if (isNaN(guess) || guess < 0 || guess > 9) {
-                    guessResult.textContent = "⚠️ 0부터 9 사이 숫자만 입력하세요.";
+                    guessResult.innerHTML = "<i class='fas fa-exclamation-triangle'></i> 0부터 9 사이 숫자만 입력하세요.";
                     guessResult.classList.remove('hidden');
                     return;
                 }
@@ -480,15 +775,14 @@ int main() {
                 // 정답 확인
                 if (guess === answer) {
                     isCorrect = true;
-                    guessResult.textContent = "🎉 정답입니다!";
-                    successMessage.textContent = `총 ${attempts}번 만에 맞췄어요.`;
+                    guessResult.classList.add('hidden');
+                    successMessage.innerHTML = "<i class='fas fa-trophy'></i> 정답입니다! 총 " + attempts + "번 만에 맞췄어요.";
                     successMessage.classList.remove('hidden');
                     guessInput.disabled = true;
                 } else {
-                    guessResult.textContent = "❌ 오답입니다. 다시 시도해보세요.";
+                    guessResult.innerHTML = "<i class='fas fa-times-circle'></i> 오답입니다. 다시 시도해보세요.";
+                    guessResult.classList.remove('hidden');
                 }
-                
-                guessResult.classList.remove('hidden');
             });
             
             // 엔터 키로 제출 가능하게
